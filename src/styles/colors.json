@@ -1,0 +1,74 @@
+{
+  "app": {
+    "name": "app",
+    "colors": {
+      "brand-primary": "#155BE3",
+      "brand-secondary": "#F1F6F9",
+      "brand-accent": "#01FFC2",
+      "black": "#2B2B2B",
+      "white": "#FFFDF9",
+      "positive": "#29D389",
+      "negative": "#F72626",
+      "warning": "#F2B442"
+    }
+  },
+  "paletteBrandGray": {
+    "name": "brand-gray",
+    "colors": {
+      "0": "#FFFFFF",
+      "50": "#F9FAFB",
+      "100": "#F3F4F6",
+      "200": "#E5E7EB",
+      "300": "#D1D5DB",
+      "400": "#9CA3AF",
+      "500": "#6B7280",
+      "600": "#4B5563",
+      "700": "#374151",
+      "800": "#1F2937",
+      "900": "#111827"
+    }
+  },
+  "paletteBrandBlue": {
+    "name": "brand-blue",
+    "colors": {
+      "25": "#F5F9FB",
+      "50": "#F1F6F9",
+      "100": "#E3EEF8",
+      "200": "#D4E6F7",
+      "300": "#C5DEF6",
+      "400": "#B1D1F5",
+      "500": "#8DB8F3",
+      "600": "#558DEC",
+      "700": "#155BE3",
+      "800": "#244AA5",
+      "900": "#303B71",
+      "1000": "#292944"
+    }
+  },
+  "categories": {
+    "green": {
+      "50": "#F6FCED",
+      "100": "#E3F4BD",
+      "200": "#99DD09",
+      "300": "#029308"
+    },
+    "orange": {
+      "50": "#FEF8EF",
+      "100": "#FFEBCC",
+      "200": "#FF9244",
+      "300": "#D44D14"
+    },
+    "violet": {
+      "50": "#F3F1FD",
+      "100": "#E4DFFC",
+      "200": "#8E7AFC",
+      "300": "#5C3EB4"
+    },
+    "blue": {
+      "50": "#F2FCFD",
+      "100": "#D9F6F8",
+      "200": "#0CC7D3",
+      "300": "#055D9C"
+    }
+  }
+}

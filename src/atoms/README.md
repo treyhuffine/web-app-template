@@ -1,0 +1,1 @@
+These are the simple building blocks of the app. They should be headless and unstyled. Then inside components, we build out more complex components specific to the app.

@@ -1,0 +1,1 @@
+Firebase admin only works in Node. This removes dependencies so it can function in V8 environments as well like Cloudflare or Vercel edge.
