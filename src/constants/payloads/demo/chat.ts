@@ -1,15 +1,16 @@
-import { BaseChatMessage } from 'langchain/schema';
+import { Message } from 'constants/ai';
 
 export interface RequestPayload {
   input: string;
-  messages: BaseChatMessage[];
-  streaming?: boolean;
+  messages: Message[];
+  isStreaming?: boolean;
   temperature?: number;
   systemMessage?: string;
 }
 
 export interface ResponsePayload {
-  answer: string;
-  chatHistory: BaseChatMessage[];
-  originalPrompt: string;
+  messages: Message[];
+  answer: Message;
+  input: string;
+  systemMessage?: string;
 }

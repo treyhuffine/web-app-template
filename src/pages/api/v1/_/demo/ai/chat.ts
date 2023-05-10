@@ -1,8 +1,11 @@
+import { CallbackManager } from 'langchain/callbacks';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
-import { NextRequest } from 'next/server';
+import { BaseChatMessage, HumanChatMessage, SystemChatMessage } from 'langchain/schema';
+import { NextRequest, NextResponse } from 'next/server';
+import { MessageTypes } from 'constants/ai';
 import { HttpMethods } from 'constants/http';
 import { RequestPayload, ResponsePayload } from 'constants/payloads/demo/chat';
+import { deserializeLangchainToChat, serializeChatToLangchain } from 'utils/ai/langchain';
 import {
   response400BadRequestError,
   response500ServerError,
@@ -16,11 +19,13 @@ export const config = {
 
 const DEFAULT_TEMPERATURE = 0.2;
 const DEFAULT_SYSTEM_MESSAGE = 'You are a helpful assistant.';
+const CHATGPT_MODEL_TURBO = 'gpt-3.5-turbo';
+const CHATGPT_MODEL_4 = 'gpt-4';
 
 const handler = async (req: NextRequest) => {
   const payload: RequestPayload = await req.json();
 
-  const { input, messages, streaming, temperature, systemMessage } = payload;
+  const { input, messages, isStreaming, temperature, systemMessage } = payload;
 
   console.log(payload);
 
@@ -29,34 +34,76 @@ const handler = async (req: NextRequest) => {
   }
 
   try {
-    const model = new ChatOpenAI({ temperature: temperature || DEFAULT_TEMPERATURE, streaming });
-
-    let chatHistory: typeof messages = [];
+    let chatLog: BaseChatMessage[] = [];
 
     if (!messages?.length) {
-      chatHistory = [
-        ...chatHistory,
-        new SystemChatMessage(systemMessage || DEFAULT_SYSTEM_MESSAGE),
-      ];
+      chatLog = [...chatLog, new SystemChatMessage(systemMessage || DEFAULT_SYSTEM_MESSAGE)];
     }
 
-    chatHistory = [...chatHistory, ...(messages || []), new HumanChatMessage(input)];
+    chatLog = [
+      ...chatLog,
+      ...serializeChatToLangchain(messages || []),
+      new HumanChatMessage(input),
+    ];
 
-    console.log(chatHistory);
+    console.log(chatLog);
 
-    const response = await model.call(chatHistory);
+    if (isStreaming) {
+      let chatStreamResponse = '';
 
-    const responsePayload: ResponsePayload = {
-      answer: response.text,
-      chatHistory,
-      originalPrompt: input,
-    };
+      const encoder = new TextEncoder();
+      const stream = new TransformStream();
+      const writer = stream.writable.getWriter();
+      const llm = new ChatOpenAI({
+        modelName: CHATGPT_MODEL_TURBO,
+        streaming: true,
+        callbackManager: CallbackManager.fromHandlers({
+          handleLLMNewToken: async (token) => {
+            chatStreamResponse += token;
+            // TODO: React all of these and insert them in the database once they finish
+            await writer.ready;
+            await writer.write(encoder.encode(token));
+          },
+          handleLLMEnd: async () => {
+            console.log('----- COMPLETE +++++', chatStreamResponse);
+            await writer.ready;
+            await writer.close();
+          },
+          handleLLMError: async (e) => {
+            console.log(e);
+            await writer.ready;
+            await writer.abort(e);
+          },
+        }),
+      });
 
-    /**
-     * @todo Check for stream vs. JSON response. Throw errors or automatic?
-     */
+      llm.call(chatLog);
 
-    return responseJson200Success(req, responsePayload);
+      return new NextResponse(stream.readable, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+        },
+      });
+    } else {
+      const llm = new ChatOpenAI({
+        modelName: CHATGPT_MODEL_TURBO,
+        temperature: temperature || DEFAULT_TEMPERATURE,
+        streaming: isStreaming,
+      });
+      const response = await llm.call(chatLog);
+
+      console.log(response);
+
+      const responsePayload: ResponsePayload = {
+        answer: { ...response, role: MessageTypes.AI },
+        messages: deserializeLangchainToChat([...chatLog, response]),
+        input: input,
+        systemMessage,
+      };
+
+      return responseJson200Success(req, responsePayload);
+    }
   } catch (error: any) {
     console.log('error', error);
     return response500ServerError(req, error?.message || 'Unknown error.');

@@ -19,24 +19,45 @@ interface RequestConfig<TRequestPayload> extends RequestInit {
   payload?: TRequestPayload;
 }
 
+type FetchResponse<TRequestPayload> = { data: TRequestPayload; isStream: boolean };
+
 type UseApiReturnType<TRequestPayload, TResponsePayload> = {
+  response: Response | null;
   data: TResponsePayload | null;
+  stream: string | null;
+  isStreamResponse: boolean;
   status: RequestStatus;
   error: string | null;
   fetchData: (
     endpiont: string,
     config?: RequestConfig<TRequestPayload>,
-  ) => Promise<TResponsePayload>;
-  post: (endpiont: string, config?: RequestConfig<TRequestPayload>) => Promise<TResponsePayload>;
-  get: (endpiont: string, config?: RequestConfig<TRequestPayload>) => Promise<TResponsePayload>;
-  put: (endpiont: string, config?: RequestConfig<TRequestPayload>) => Promise<TResponsePayload>;
-  patch: (endpiont: string, config?: RequestConfig<TRequestPayload>) => Promise<TResponsePayload>;
-  delete: (endpiont: string, config?: RequestConfig<TRequestPayload>) => Promise<TResponsePayload>;
+  ) => Promise<FetchResponse<TResponsePayload>>;
+  post: (
+    endpiont: string,
+    config?: RequestConfig<TRequestPayload>,
+  ) => Promise<FetchResponse<TResponsePayload>>;
+  get: (
+    endpiont: string,
+    config?: RequestConfig<TRequestPayload>,
+  ) => Promise<FetchResponse<TResponsePayload>>;
+  put: (
+    endpiont: string,
+    config?: RequestConfig<TRequestPayload>,
+  ) => Promise<FetchResponse<TResponsePayload>>;
+  patch: (
+    endpiont: string,
+    config?: RequestConfig<TRequestPayload>,
+  ) => Promise<FetchResponse<TResponsePayload>>;
+  delete: (
+    endpiont: string,
+    config?: RequestConfig<TRequestPayload>,
+  ) => Promise<FetchResponse<TResponsePayload>>;
   RequestStatus: typeof RequestStatus;
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
   responseStatusCode: number | null;
+  responseHeaders: Headers | null;
   stopRequest: () => void;
 };
 
@@ -62,19 +83,31 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
   // State variables for request status, data, and errors
   const [status, setStatus] = useState(RequestStatus.Idle);
   const [data, setData] = useState<null | TResponsePayload>(null);
+  const [stream, setStream] = useState<null | string>(null);
   const [error, setError] = useState<null | string>(null);
+  const [isStreamResponse, setIsStreamResponse] = useState(false);
   const [responseStatusCode, setResponseStatusCode] = useState<null | number>(null);
+  const [responseHeaders, setResponseHeaders] = useState<Headers | null>(null);
+  const [response, setResponse] = useState<Response | null>(null);
   const abortController = useRef(new AbortController());
+
+  const reset = () => {
+    setResponse(null);
+    setData(null);
+    setStream(null);
+    setError(null);
+    setIsStreamResponse(false);
+    setResponseStatusCode(null);
+    setResponseHeaders(null);
+    setStatus(RequestStatus.InProgress);
+  };
 
   // Function to handle the API request
   const fetchData = async (
     fetchEndpoint: string,
     { payload, ...customConfig }: RequestConfig<TRequestPayload> = {},
   ) => {
-    setData(null);
-    setError(null);
-    setResponseStatusCode(null);
-    setStatus(RequestStatus.InProgress);
+    reset();
 
     try {
       const headers = { 'content-type': 'application/json' };
@@ -105,16 +138,20 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
         signal: abortController.current.signal,
       });
 
+      setResponse(response);
       setResponseStatusCode(response.status);
+      setResponseHeaders(response.headers);
 
       if (!response.ok) {
         throw new Error(`An error occurred: ${response.statusText}`);
       }
 
       const contentType = response.headers.get('Content-Type');
-      const isStreaming = contentType && contentType.includes('text/event-stream');
+      const isStream = !!contentType && contentType.includes('text/event-stream');
 
-      if (isStreaming) {
+      setIsStreamResponse(isStream);
+
+      if (isStream) {
         const data = response.body;
 
         if (!data) {
@@ -133,18 +170,19 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
           const chunkValue = decoder.decode(value);
           result += chunkValue;
           // @ts-ignore It will be a string if it's streaming, how do I tell TS that?
-          setData((prev) => prev + chunkValue);
+          // setData((prev) => prev + chunkValue);
+          setStream((prev) => (prev || '') + chunkValue);
         }
 
         setStatus(RequestStatus.Success);
 
-        return result;
+        return { data: result, isStream };
       } else {
         const result = await response.json();
         setData(result);
         setStatus(RequestStatus.Success);
 
-        return result;
+        return { data: result, isStream };
       }
     } catch (error) {
       setError(error.message);
@@ -158,7 +196,10 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
   }, []);
 
   return {
+    response,
     data,
+    stream,
+    isStreamResponse,
     status,
     error,
     fetchData,
@@ -177,6 +218,7 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
     isSuccess: status === RequestStatus.Success,
     isError: status === RequestStatus.Error,
     responseStatusCode,
+    responseHeaders,
     stopRequest,
   };
 };

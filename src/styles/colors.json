@@ -16,7 +16,7 @@
     "name": "brand-gray",
     "colors": {
       "0": "#FFFFFF",
-      "50": "#F9FAFB",
+      "50": "#F9F9FB",
       "100": "#F3F4F6",
       "200": "#E5E7EB",
       "300": "#D1D5DB",
@@ -31,7 +31,7 @@
   "paletteBrandBlue": {
     "name": "brand-blue",
     "colors": {
-      "25": "#F5F9FB",
+      "25": "#F9F9FB",
       "50": "#F1F6F9",
       "100": "#E3EEF8",
       "200": "#D4E6F7",

@@ -1,14 +1,16 @@
 import React, { KeyboardEvent, KeyboardEventHandler, useState } from 'react';
+import { Message, MessageTypes } from 'constants/ai';
 import {
   RequestPayload as ChatRequestPayload,
   ResponsePayload as ChatResponsePayload,
 } from 'constants/payloads/demo/chat';
-import api from 'services/client/api';
 import { KeyCodes } from 'utils/client/dom';
 import { useApiGateway } from 'hooks/useApi';
 import { useAutosizeTextArea } from 'hooks/useAutosizeTextArea';
 import SendIcon from 'svg/SendIcon';
 import Button from 'atoms/Button';
+import AiMessage from './AiMessage';
+import UserMessage from './UserMessage';
 
 const API_ROOT = 'v1/_/demo/ai';
 const CHAT_OPTIONS = [
@@ -43,44 +45,62 @@ const CHAT_OPTIONS = [
 ];
 
 const DemoAiChat = () => {
+  const [isStreaming, setIsStreaming] = useState(false);
   const [chatApi, setChatApi] = useState(CHAT_OPTIONS[0].api);
-  const [chatLog, setChatLog] = useState([]);
+  const [chatLog, setChatLog] = useState<Message[]>([]);
   const [chatText, setChatText] = useState('');
   const { textAreaRef } = useAutosizeTextArea();
   const formRef = React.useRef<HTMLFormElement>(null);
-  const { data, error, post, status, isLoading } = useApiGateway('');
-
-  console.log(chatApi, data, error, status, isLoading);
+  const { data, stream, error, post, status, isLoading } = useApiGateway('');
 
   return (
     <div>
-      <div className="bg-bg-primary-lightmode fixed left-0 top-0 h-14 w-screen">
+      <div className="fixed left-0 top-0 h-14 w-screen bg-bg-primary-lightmode">
         <div className="mx-auto flex h-full w-full max-w-chat-container items-center justify-between">
           <h1 className="font-bold">Demo chat</h1>
-          <select
-            value={chatApi}
-            onChange={(e) => {
-              setChatApi(e.target.value);
-              setChatLog([]);
-            }}
-          >
-            {CHAT_OPTIONS.map((option) => (
-              <option key={option.api} value={option.api}>
-                {option.name}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center">
+            <div className="mr-6 flex items-center">
+              <div className="mr-2">Stream</div>
+              <input
+                type="checkbox"
+                checked={isStreaming}
+                onChange={(e) => setIsStreaming(!isStreaming)}
+              />
+            </div>
+            <select
+              value={chatApi}
+              onChange={(e) => {
+                setChatApi(e.target.value);
+                setChatLog([]);
+              }}
+            >
+              {CHAT_OPTIONS.map((option) => (
+                <option key={option.api} value={option.api}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
-      <div className="mx-auto w-full max-w-chat-container py-14">
-        {JSON.stringify(chatLog, null, 2)}
+      <div className="mx-auto w-full max-w-chat-container space-y-4 py-20">
+        {chatLog.map((chat: Message, index: number) => {
+          if (chat.role === MessageTypes.HUMAN) {
+            return <UserMessage key={index} text={chat.text} />;
+          } else if (chat.role === MessageTypes.AI) {
+            return <AiMessage key={index} text={chat.text} />;
+          } else {
+            return null;
+          }
+        })}
+        {isLoading && isStreaming && <AiMessage text={stream} />}
+        {isLoading && <div>Loading...</div>}
       </div>
-      <div className="bg-bg-primary-lightmode fixed bottom-0 left-0 w-screen pb-4">
+      <div className="fixed bottom-0 left-0 w-screen bg-bg-primary-lightmode pb-4">
         <form
           ref={formRef}
           className="mx-auto flex h-full w-full max-w-chat-container"
-          onSubmit={(e) => {
-            console.log('%%%%%%%%%%%%%%%%%%%%%%%%%% SUBMITTING %%%%%%%%%%%%%%%%%%%%%%%%%%');
+          onSubmit={async (e) => {
             e.preventDefault();
             e.stopPropagation();
 
@@ -90,16 +110,27 @@ const DemoAiChat = () => {
               return;
             }
 
-            setChatApi((t) => t.trim());
-            post(`${API_ROOT}/${chatApi}`, { payload: { input: chatText.trim() } }).then((res) => {
-              console.log(res);
+            setChatLog((log) => [...log, { text: chatText.trim(), role: MessageTypes.HUMAN }]);
+            setChatText('');
+            const response = await post(`${API_ROOT}/${chatApi}`, {
+              payload: { input: chatText.trim(), messages: chatLog, isStreaming },
             });
+
+            if (response.isStream) {
+              setChatLog((messages) => [
+                ...messages,
+                { text: response.data, role: MessageTypes.AI },
+              ]);
+            } else {
+              setChatLog(response.data.messages);
+            }
           }}
         >
           <textarea
             ref={textAreaRef}
             value={chatText}
             onChange={(e) => setChatText(e.target.value)}
+            disabled={isLoading}
             aria-multiline
             rows={0} // For auto-resizing
             onKeyDown={(
@@ -113,8 +144,7 @@ const DemoAiChat = () => {
               }
               return () => {};
             }}
-            className="mr-2 max-h-40 min-h-[2.5rem] w-full resize-none rounded-xl border border-gray-800 px-4 py-2 text-sm outline-none transition-shadow duration-200 ease-in-out focus:shadow-chat-box focus:outline-none"
-            style={{ outline: 'none' }}
+            className="mr-2 max-h-40 min-h-[2.5rem] w-full resize-none rounded-xl border border-gray-800 px-4 py-2 text-sm outline-none transition-shadow duration-200 ease-in-out focus:shadow-chat-box focus:outline-none disabled:opacity-60"
           />
           <Button type="submit">
             <SendIcon />
@@ -122,7 +152,7 @@ const DemoAiChat = () => {
           <Button
             type="submit"
             disabled={isLoading}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-primary text-white transition-all hover:shadow-md"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-primary text-white transition-all hover:shadow-md disabled:opacity-60"
           >
             <SendIcon className="h-5 w-5" />
           </Button>

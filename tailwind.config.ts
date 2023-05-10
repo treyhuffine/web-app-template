@@ -60,7 +60,7 @@ export default {
         positive: app.colors['positive'],
         negative: app.colors['negative'],
         warning: app.colors['warning'],
-        'color-border': '#E5E7EB',
+        'border-primary-lightmode': '#E5E7EB',
       },
       fontFamily: {
         sans: ['Inter', ...fontFamily.sans],
