@@ -1,8 +1,13 @@
 export enum RequestStatus {
   Idle = 'IDLE',
-  InProgress = 'IN_PROGRESS',
+  Loading = 'LOADING',
   Success = 'SUCCESS',
   Error = 'ERROR',
+}
+
+export enum FetchStatus {
+  Idle = 'IDLE',
+  Fetching = 'FETCHING',
 }
 
 export interface ErrorResponse {

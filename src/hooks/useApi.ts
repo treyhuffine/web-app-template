@@ -1,7 +1,18 @@
 import { useCallback, useRef, useState } from 'react';
 import { API_URL } from 'constants/api';
 import { HttpMethods } from 'constants/http';
-import { RequestStatus } from 'constants/requests';
+import {
+  RequestStatus,
+  /**
+   * @todo Introduce FetchStatus? One shows the state of data, and the other shows if it's fetching.
+   * Ex. Perhaps I want to fetch again without removing the old data and showing it loading.
+   */
+  // FetchStatus
+} from 'constants/requests';
+
+/**
+ * @todo SHOULD I JUST USE REACT QUERY?
+ */
 
 /**
  * @todo Implement this once we have a GraphQL URL to pull necessary data for the getViewerToken
@@ -109,7 +120,7 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
     setIsStreamResponse(false);
     setResponseStatusCode(null);
     setResponseHeaders(null);
-    setStatus(RequestStatus.InProgress);
+    setStatus(RequestStatus.Loading);
   };
 
   // Function to handle the API request
@@ -118,6 +129,9 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
     payload,
     ...customConfig
   }: RequestConfig<TRequestPayload> = {}) => {
+    /**
+     * @todo Implement some kind of refetching where it doesn't clobber the old data. May need to introduce a FetchStatus.
+     */
     resetNewRequest();
     setIsCalled(true);
 
@@ -236,7 +250,7 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
       fetchData({ ...rest, method: HttpMethods.Delete, payload }),
     isCalled,
     RequestStatus,
-    isLoading: status === RequestStatus.InProgress,
+    isLoading: status === RequestStatus.Loading,
     isSuccess: status === RequestStatus.Success,
     isError: status === RequestStatus.Error,
     responseStatusCode,

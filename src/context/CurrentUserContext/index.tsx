@@ -47,7 +47,7 @@ export const CurrentUserProvider: React.FC<React.PropsWithChildren> = ({ childre
 
   React.useEffect(() => {
     const fetchIp = async () => {
-      setIpRequestStatus(RequestStatus.InProgress);
+      setIpRequestStatus(RequestStatus.Loading);
       try {
         const data: IpResponse = await api.get(IP_PATH);
         setIpResponse({
