@@ -17,41 +17,58 @@ const CHAT_OPTIONS = [
   {
     name: 'Normal chat',
     api: 'chat',
+    initialMessage: '',
+    isStreamingAvailable: true,
   },
   {
     name: 'Chat template',
     api: 'chat-template',
+    initialMessage:
+      'I only answer messages about finding capitals of locations. Only write a city, state, or country name in the input.',
+    isStreamingAvailable: false,
   },
   {
     name: 'Chat formatted output',
     api: 'chat-formatted-output',
+    initialMessage: '',
+    isStreamingAvailable: false,
   },
   {
     name: 'Buffer vector',
     api: 'buffer-vector',
+    initialMessage: '',
+    isStreamingAvailable: false,
   },
   {
     name: 'Plugins',
     api: 'plugin',
+    initialMessage: '',
+    isStreamingAvailable: false,
   },
   {
     name: 'Sequential chain',
     api: 'sequential-chain',
+    initialMessage: '',
+    isStreamingAvailable: false,
   },
   {
     name: 'Pinecone (todo)',
     api: 'pinecone',
+    initialMessage: '',
+    isStreamingAvailable: false,
   },
 ];
 
 const DemoAiChat = () => {
-  const [isStreaming, setIsStreaming] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(true);
   const [chatApi, setChatApi] = useState(CHAT_OPTIONS[0].api);
   const [chatLog, setChatLog] = useState<Message[]>([]);
   const [chatText, setChatText] = useState('');
   const { textAreaRef } = useAutosizeTextArea();
   const formRef = React.useRef<HTMLFormElement>(null);
-  const { data, stream, error, post, status, isLoading } = useApiGateway('');
+  const { data, stream, error, post, status, isLoading, resetInitialState } = useApiGateway();
+  const acitveItem = CHAT_OPTIONS.find((option) => option.api === chatApi);
+  const isStreamingAvailable = acitveItem?.isStreamingAvailable ?? false;
 
   return (
     <div>
@@ -59,19 +76,22 @@ const DemoAiChat = () => {
         <div className="mx-auto flex h-full w-full max-w-chat-container items-center justify-between">
           <h1 className="font-bold">Demo chat</h1>
           <div className="flex items-center">
-            <div className="mr-6 flex items-center">
-              <div className="mr-2">Stream</div>
-              <input
-                type="checkbox"
-                checked={isStreaming}
-                onChange={(e) => setIsStreaming(!isStreaming)}
-              />
-            </div>
+            {isStreamingAvailable && (
+              <div className="mr-6 flex items-center">
+                <div className="mr-2">Stream</div>
+                <input
+                  type="checkbox"
+                  checked={isStreaming}
+                  onChange={(e) => setIsStreaming(!isStreaming)}
+                />
+              </div>
+            )}
             <select
               value={chatApi}
               onChange={(e) => {
                 setChatApi(e.target.value);
                 setChatLog([]);
+                resetInitialState();
               }}
             >
               {CHAT_OPTIONS.map((option) => (
@@ -84,6 +104,7 @@ const DemoAiChat = () => {
         </div>
       </div>
       <div className="mx-auto w-full max-w-chat-container space-y-4 py-20">
+        {!!acitveItem.initialMessage && <AiMessage text={acitveItem.initialMessage} />}
         {chatLog.map((chat: Message, index: number) => {
           if (chat.role === MessageTypes.HUMAN) {
             return <UserMessage key={index} text={chat.text} />;
@@ -93,7 +114,7 @@ const DemoAiChat = () => {
             return null;
           }
         })}
-        {isLoading && isStreaming && <AiMessage text={stream} />}
+        {isStreamingAvailable && isLoading && isStreaming && <AiMessage text={stream} />}
         {isLoading && <div>Loading...</div>}
       </div>
       <div className="fixed bottom-0 left-0 w-screen bg-bg-primary-lightmode pb-4">
@@ -112,7 +133,8 @@ const DemoAiChat = () => {
 
             setChatLog((log) => [...log, { text: chatText.trim(), role: MessageTypes.HUMAN }]);
             setChatText('');
-            const response = await post(`${API_ROOT}/${chatApi}`, {
+            const response = await post({
+              endpoint: `${API_ROOT}/${chatApi}`,
               payload: { input: chatText.trim(), messages: chatLog, isStreaming },
             });
 

@@ -24,7 +24,6 @@ const CHATGPT_MODEL_4 = 'gpt-4';
 
 const handler = async (req: NextRequest) => {
   const payload: RequestPayload = await req.json();
-
   const { input, messages, isStreaming, temperature, systemMessage } = payload;
 
   console.log(payload);

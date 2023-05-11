@@ -23,6 +23,7 @@
     "cookie": "^0.5.0",
     "copy-to-clipboard": "^3.3.3",
     "dotenv": "^16.0.3",
+    "eventsource-parser": "^1.0.0",
     "firebase": "^9.21.0",
     "firebase-admin": "^11.8.0",
     "formik": "^2.2.9",

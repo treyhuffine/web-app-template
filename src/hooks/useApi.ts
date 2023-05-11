@@ -8,6 +8,10 @@ import { RequestStatus } from 'constants/requests';
  */
 // import { getViewerToken } from 'services/client';
 
+/**
+ * @todo Should I make a simple version that just returns the response and manages the loading state?
+ */
+
 interface Params {
   id?: string;
   baseUrl?: string;
@@ -16,10 +20,16 @@ interface Params {
 }
 
 interface RequestConfig<TRequestPayload> extends RequestInit {
+  endpoint?: string;
   payload?: TRequestPayload;
 }
 
-type FetchResponse<TRequestPayload> = { data: TRequestPayload; isStream: boolean };
+type FetchResponse<TRequestPayload> = {
+  data?: TRequestPayload | string;
+  isStream: boolean;
+  error?: string | null;
+  isError: boolean;
+};
 
 type UseApiReturnType<TRequestPayload, TResponsePayload> = {
   response: Response | null;
@@ -28,30 +38,13 @@ type UseApiReturnType<TRequestPayload, TResponsePayload> = {
   isStreamResponse: boolean;
   status: RequestStatus;
   error: string | null;
-  fetchData: (
-    endpiont: string,
-    config?: RequestConfig<TRequestPayload>,
-  ) => Promise<FetchResponse<TResponsePayload>>;
-  post: (
-    endpiont: string,
-    config?: RequestConfig<TRequestPayload>,
-  ) => Promise<FetchResponse<TResponsePayload>>;
-  get: (
-    endpiont: string,
-    config?: RequestConfig<TRequestPayload>,
-  ) => Promise<FetchResponse<TResponsePayload>>;
-  put: (
-    endpiont: string,
-    config?: RequestConfig<TRequestPayload>,
-  ) => Promise<FetchResponse<TResponsePayload>>;
-  patch: (
-    endpiont: string,
-    config?: RequestConfig<TRequestPayload>,
-  ) => Promise<FetchResponse<TResponsePayload>>;
-  delete: (
-    endpiont: string,
-    config?: RequestConfig<TRequestPayload>,
-  ) => Promise<FetchResponse<TResponsePayload>>;
+  fetchData: (config?: RequestConfig<TRequestPayload>) => Promise<FetchResponse<TResponsePayload>>;
+  post: (config?: RequestConfig<TRequestPayload>) => Promise<FetchResponse<TResponsePayload>>;
+  get: (config?: RequestConfig<TRequestPayload>) => Promise<FetchResponse<TResponsePayload>>;
+  put: (config?: RequestConfig<TRequestPayload>) => Promise<FetchResponse<TResponsePayload>>;
+  patch: (config?: RequestConfig<TRequestPayload>) => Promise<FetchResponse<TResponsePayload>>;
+  delete: (config?: RequestConfig<TRequestPayload>) => Promise<FetchResponse<TResponsePayload>>;
+  isCalled: boolean;
   RequestStatus: typeof RequestStatus;
   isLoading: boolean;
   isSuccess: boolean;
@@ -59,6 +52,7 @@ type UseApiReturnType<TRequestPayload, TResponsePayload> = {
   responseStatusCode: number | null;
   responseHeaders: Headers | null;
   stopRequest: () => void;
+  resetInitialState: () => void;
 };
 
 /**
@@ -75,23 +69,39 @@ type UseApiReturnType<TRequestPayload, TResponsePayload> = {
 // };
 const injectViewerToken = async () => ({});
 
+const removeLeadingSlash = (endpoint: string = '') => {
+  return endpoint[0] === '/' ? endpoint.slice(1) : endpoint;
+};
+
 export const useApi = <TRequestPayload = any, TResponsePayload = any>({
   baseUrl,
-  endpoint: hookEndpoint,
+  endpoint: endpointPrefix,
   injectHeaders,
 }: Params): UseApiReturnType<TRequestPayload, TResponsePayload> => {
-  // State variables for request status, data, and errors
   const [status, setStatus] = useState(RequestStatus.Idle);
-  const [data, setData] = useState<null | TResponsePayload>(null);
-  const [stream, setStream] = useState<null | string>(null);
-  const [error, setError] = useState<null | string>(null);
+  const [data, setData] = useState<TResponsePayload | null>(null);
+  const [stream, setStream] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isCalled, setIsCalled] = useState(false);
   const [isStreamResponse, setIsStreamResponse] = useState(false);
-  const [responseStatusCode, setResponseStatusCode] = useState<null | number>(null);
+  const [responseStatusCode, setResponseStatusCode] = useState<number | null>(null);
   const [responseHeaders, setResponseHeaders] = useState<Headers | null>(null);
   const [response, setResponse] = useState<Response | null>(null);
   const abortController = useRef(new AbortController());
 
-  const reset = () => {
+  const resetInitialState = useCallback(() => {
+    setResponse(null);
+    setData(null);
+    setStream(null);
+    setError(null);
+    setIsStreamResponse(false);
+    setResponseStatusCode(null);
+    setResponseHeaders(null);
+    setStatus(RequestStatus.Idle);
+    setIsCalled(false);
+  }, []);
+
+  const resetNewRequest = () => {
     setResponse(null);
     setData(null);
     setStream(null);
@@ -103,11 +113,13 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
   };
 
   // Function to handle the API request
-  const fetchData = async (
-    fetchEndpoint: string,
-    { payload, ...customConfig }: RequestConfig<TRequestPayload> = {},
-  ) => {
-    reset();
+  const fetchData = async ({
+    endpoint: fetchEndpoint,
+    payload,
+    ...customConfig
+  }: RequestConfig<TRequestPayload> = {}) => {
+    resetNewRequest();
+    setIsCalled(true);
 
     try {
       const headers = { 'content-type': 'application/json' };
@@ -131,8 +143,12 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
         config.body = JSON.stringify(payload);
       }
 
-      const endpoint = fetchEndpoint || hookEndpoint;
-      const requestEndpoint = endpoint[0] === '/' ? endpoint.slice(1) : endpoint;
+      /**
+       * @todo Should I pick between the endpoints or combine them?
+       */
+      const endpoint = `${endpointPrefix || ''}/${removeLeadingSlash(fetchEndpoint || '')}`;
+      const requestEndpoint = removeLeadingSlash(endpoint);
+
       const response = await fetch(`${baseUrl}/${requestEndpoint}`, {
         ...config,
         signal: abortController.current.signal,
@@ -143,22 +159,17 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
       setResponseHeaders(response.headers);
 
       if (!response.ok) {
-        throw new Error(`An error occurred: ${response.statusText}`);
+        throw new Error(`${response.statusText}`);
       }
 
       const contentType = response.headers.get('Content-Type');
       const isStream = !!contentType && contentType.includes('text/event-stream');
+      const isJson = !!contentType && contentType.includes('application/json');
 
       setIsStreamResponse(isStream);
 
       if (isStream) {
         const data = response.body;
-
-        if (!data) {
-          setStatus(RequestStatus.Success);
-          return;
-        }
-
         const reader = data.getReader();
         const decoder = new TextDecoder();
         let result = '';
@@ -171,22 +182,32 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
           result += chunkValue;
           // @ts-ignore It will be a string if it's streaming, how do I tell TS that?
           // setData((prev) => prev + chunkValue);
+          /**
+           * @todo Pass in a handleStream function that handles the stream response? Maybe you need to JSON.parse or something.
+           */
           setStream((prev) => (prev || '') + chunkValue);
         }
 
         setStatus(RequestStatus.Success);
 
-        return { data: result, isStream };
-      } else {
-        const result = await response.json();
+        return { data: result, isStream, isError: false };
+      } else if (isJson) {
+        const result: TResponsePayload = await response.json();
         setData(result);
         setStatus(RequestStatus.Success);
 
-        return { data: result, isStream };
+        return { data: result, isStream, isError: false };
+      } else {
+        const result = await response.text();
+        setStatus(RequestStatus.Success);
+
+        return { data: result, isStream, isError: false };
       }
     } catch (error) {
       setError(error.message);
       setStatus(RequestStatus.Error);
+
+      return { error: error.message, isStream: false, isError: true };
     }
   };
 
@@ -203,16 +224,17 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
     status,
     error,
     fetchData,
-    post: (endpoint: string, { payload, ...rest }: RequestConfig<TRequestPayload>) =>
-      fetchData(endpoint, { ...rest, method: HttpMethods.Post, payload }),
-    get: (endpoint: string, { payload, ...rest }: RequestConfig<TRequestPayload>) =>
-      fetchData(endpoint, { ...rest, method: HttpMethods.Get, payload }),
-    put: (endpoint: string, { payload, ...rest }: RequestConfig<TRequestPayload>) =>
-      fetchData(endpoint, { ...rest, method: HttpMethods.Put, payload }),
-    patch: (endpoint: string, { payload, ...rest }: RequestConfig<TRequestPayload>) =>
-      fetchData(endpoint, { ...rest, method: HttpMethods.Patch, payload }),
-    delete: (endpoint: string, { payload, ...rest }: RequestConfig<TRequestPayload>) =>
-      fetchData(endpoint, { ...rest, method: HttpMethods.Delete, payload }),
+    post: ({ payload, ...rest }: RequestConfig<TRequestPayload>) =>
+      fetchData({ ...rest, method: HttpMethods.Post, payload }),
+    get: ({ payload, ...rest }: RequestConfig<TRequestPayload>) =>
+      fetchData({ ...rest, method: HttpMethods.Get, payload }),
+    put: ({ payload, ...rest }: RequestConfig<TRequestPayload>) =>
+      fetchData({ ...rest, method: HttpMethods.Put, payload }),
+    patch: ({ payload, ...rest }: RequestConfig<TRequestPayload>) =>
+      fetchData({ ...rest, method: HttpMethods.Patch, payload }),
+    delete: ({ payload, ...rest }: RequestConfig<TRequestPayload>) =>
+      fetchData({ ...rest, method: HttpMethods.Delete, payload }),
+    isCalled,
     RequestStatus,
     isLoading: status === RequestStatus.InProgress,
     isSuccess: status === RequestStatus.Success,
@@ -220,6 +242,7 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
     responseStatusCode,
     responseHeaders,
     stopRequest,
+    resetInitialState,
   };
 };
 

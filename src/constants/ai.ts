@@ -13,3 +13,18 @@ export const MessageTypes = {
   GENERIC: 'generic' as MessageType,
   SYSTEM: 'system' as MessageType,
 };
+
+export interface BaseRequesttPayload {
+  input: string;
+  messages: Message[];
+  isStreaming?: boolean;
+  temperature?: number;
+  systemMessage?: string;
+}
+
+export interface BaseResponsePayload {
+  messages: Message[];
+  answer: Message;
+  input: string;
+  systemMessage?: string;
+}
