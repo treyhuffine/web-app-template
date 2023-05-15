@@ -2,7 +2,7 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 import { NextRequest, NextResponse } from 'next/server';
-import { MessageTypes } from 'constants/ai';
+import { LangchainMessageRoles } from 'constants/ai';
 import { RequestPayload, ResponsePayload } from 'constants/payloads/demo/chatTemplate';
 import { deserializeLangchainToChat, serializeChatToLangchain } from 'utils/ai/langchain';
 
@@ -60,7 +60,7 @@ export default async function handler(req: NextRequest, res: NextResponse) {
     console.log(response.text);
 
     const responsePayload: ResponsePayload = {
-      answer: { ...response, role: MessageTypes.AI },
+      answer: { ...response, role: LangchainMessageRoles.Ai },
       messages: deserializeLangchainToChat([...chatLog, response]),
       input: input,
       systemMessage,

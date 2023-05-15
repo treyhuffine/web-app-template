@@ -2,8 +2,7 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { MessageTypes } from 'constants/ai';
+import { LangchainMessageRoles } from 'constants/ai';
 import {
   RequestPayload,
   ResponsePayload,
@@ -65,7 +64,7 @@ export default async function handler(req: NextRequest, res: NextResponse) {
 
     const responsePayload: ResponsePayload = {
       structuredOutput: structuredOutput,
-      answer: { ...response, role: MessageTypes.AI },
+      answer: { ...response, role: LangchainMessageRoles.Ai },
       messages: deserializeLangchainToChat([...chatLog, response]),
       input: input,
       systemMessage,

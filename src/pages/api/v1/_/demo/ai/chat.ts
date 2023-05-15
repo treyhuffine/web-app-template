@@ -2,7 +2,7 @@ import { CallbackManager } from 'langchain/callbacks';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { BaseChatMessage, HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 import { NextRequest, NextResponse } from 'next/server';
-import { MessageTypes } from 'constants/ai';
+import { LangchainMessageRoles } from 'constants/ai';
 import { HttpMethods } from 'constants/http';
 import { RequestPayload, ResponsePayload } from 'constants/payloads/demo/chat';
 import { deserializeLangchainToChat, serializeChatToLangchain } from 'utils/ai/langchain';
@@ -95,7 +95,7 @@ const handler = async (req: NextRequest) => {
       console.log(response);
 
       const responsePayload: ResponsePayload = {
-        answer: { ...response, role: MessageTypes.AI },
+        answer: { ...response, role: LangchainMessageRoles.Ai },
         messages: deserializeLangchainToChat([...chatLog, response]),
         input: input,
         systemMessage,

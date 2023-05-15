@@ -1,5 +1,5 @@
 import React, { KeyboardEvent, KeyboardEventHandler, useState } from 'react';
-import { Message, MessageTypes } from 'constants/ai';
+import { LangchainMessageRoles, Message } from 'constants/ai';
 import {
   RequestPayload as ChatRequestPayload,
   ResponsePayload as ChatResponsePayload,
@@ -106,9 +106,9 @@ const DemoAiChat = () => {
       <div className="mx-auto w-full max-w-chat-container space-y-4 py-20">
         {!!acitveItem.initialMessage && <AiMessage text={acitveItem.initialMessage} />}
         {chatLog.map((chat: Message, index: number) => {
-          if (chat.role === MessageTypes.HUMAN) {
+          if (chat.role === LangchainMessageRoles.Human) {
             return <UserMessage key={index} text={chat.text} />;
-          } else if (chat.role === MessageTypes.AI) {
+          } else if (chat.role === LangchainMessageRoles.Ai) {
             return <AiMessage key={index} text={chat.text} />;
           } else {
             return null;
@@ -131,7 +131,10 @@ const DemoAiChat = () => {
               return;
             }
 
-            setChatLog((log) => [...log, { text: chatText.trim(), role: MessageTypes.HUMAN }]);
+            setChatLog((log) => [
+              ...log,
+              { text: chatText.trim(), role: LangchainMessageRoles.Human },
+            ]);
             setChatText('');
             const response = await post({
               endpoint: `${API_ROOT}/${chatApi}`,
@@ -141,7 +144,7 @@ const DemoAiChat = () => {
             if (response.isStream) {
               setChatLog((messages) => [
                 ...messages,
-                { text: response.data, role: MessageTypes.AI },
+                { text: response.data, role: LangchainMessageRoles.Ai },
               ]);
             } else {
               setChatLog(response.data.messages);

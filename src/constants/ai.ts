@@ -7,11 +7,11 @@ export interface Message {
   role: MessageType;
 }
 
-export const MessageTypes = {
-  HUMAN: 'human' as MessageType,
-  AI: 'ai' as MessageType,
-  GENERIC: 'generic' as MessageType,
-  SYSTEM: 'system' as MessageType,
+export const LangchainMessageRoles = {
+  Human: 'human' as MessageType,
+  Ai: 'ai' as MessageType,
+  Generic: 'generic' as MessageType,
+  System: 'system' as MessageType,
 };
 
 export interface BaseRequesttPayload {

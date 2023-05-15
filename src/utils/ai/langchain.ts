@@ -1,13 +1,13 @@
 import { AIChatMessage, HumanChatMessage, SystemChatMessage } from 'langchain/schema';
-import { LangchainMessage, Message, MessageTypes } from 'constants/ai';
+import { LangchainMessage, LangchainMessageRoles, Message } from 'constants/ai';
 
 export const serializeChatToLangchain = (chatHistory: Message[] = []) => {
   return chatHistory.map((message) => {
-    if (message.role === MessageTypes.HUMAN) {
+    if (message.role === LangchainMessageRoles.Human) {
       return new HumanChatMessage(message.text);
     }
 
-    if (message.role === MessageTypes.SYSTEM) {
+    if (message.role === LangchainMessageRoles.System) {
       return new SystemChatMessage(message.text);
     }
 
@@ -18,15 +18,15 @@ export const serializeChatToLangchain = (chatHistory: Message[] = []) => {
 export const deserializeLangchainToChat = (chatHistory: LangchainMessage[] = []) => {
   return chatHistory
     .map((message) => {
-      if (message._getType() === MessageTypes.HUMAN) {
-        return { text: message.text, role: MessageTypes.HUMAN };
+      if (message._getType() === LangchainMessageRoles.Human) {
+        return { text: message.text, role: LangchainMessageRoles.Human };
       }
 
-      if (message._getType() === MessageTypes.SYSTEM) {
-        return { text: message.text, role: MessageTypes.SYSTEM };
+      if (message._getType() === LangchainMessageRoles.System) {
+        return { text: message.text, role: LangchainMessageRoles.System };
       }
 
-      return { text: message.text, role: MessageTypes.AI };
+      return { text: message.text, role: LangchainMessageRoles.Ai };
     })
-    .filter((message) => message.role !== MessageTypes.SYSTEM);
+    .filter((message) => message.role !== LangchainMessageRoles.System);
 };
