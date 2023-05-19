@@ -1,5 +1,5 @@
-import { BaseRequesttPayload, BaseResponsePayload } from 'constants/ai';
+import { BaseRequestPayload, BaseResponsePayload } from 'constants/ai';
 
-export interface RequestPayload extends BaseRequesttPayload {}
+export interface RequestPayload extends BaseRequestPayload {}
 
 export interface ResponsePayload extends BaseResponsePayload {}

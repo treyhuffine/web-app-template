@@ -1,7 +1,7 @@
 export const DEFAULT_REVENUE_SHARE = 0.2;
 export const AFFILIATE_KEY = 'go';
-export const DEFAULT_REDIRECT = 'https://mavyn.com';
-export const DEFAULT_AFFILIATE_REDIRECT = 'https://mavyn.com';
+export const DEFAULT_REDIRECT = '<URL>';
+export const DEFAULT_AFFILIATE_REDIRECT = '<URL>';
 
 export enum AffiliateTier {
   Base = 'BASE',

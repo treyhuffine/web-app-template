@@ -1,6 +1,6 @@
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import { z } from 'zod';
-import { BaseRequesttPayload, BaseResponsePayload } from 'constants/ai';
+import { BaseRequestPayload, BaseResponsePayload } from 'constants/ai';
 
 const stucturedOutput = z.object({
   answer: z.string().describe('Rewriting'),
@@ -13,7 +13,7 @@ const stucturedOutput = z.object({
 
 export const parser = StructuredOutputParser.fromZodSchema(stucturedOutput);
 
-export interface RequestPayload extends BaseRequesttPayload {}
+export interface RequestPayload extends BaseRequestPayload {}
 
 export interface ResponsePayload extends BaseResponsePayload {
   structuredOutput: z.infer<typeof stucturedOutput>;

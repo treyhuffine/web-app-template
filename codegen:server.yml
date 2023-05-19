@@ -1,0 +1,12 @@
+overwrite: true
+schema:
+  - http://localhost:8080/v1/graphql:
+      headers:
+        X-Hasura-Admin-Secret: thisisasupersecretsignaturethisisasupersecretsignaturethisisasupersecretsignature
+        Content-Type: application/json
+documents: 'src/services/server/**/*.ts'
+generates:
+  src/types/generated/server.ts:
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'

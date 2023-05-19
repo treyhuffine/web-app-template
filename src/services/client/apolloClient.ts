@@ -16,7 +16,7 @@ import merge from 'deepmerge';
 import { createClient } from 'graphql-ws';
 import * as http from 'http';
 import { isEqual } from 'lodash';
-import { getViewerToken } from 'services/client';
+import { getViewerToken } from 'services/client/auth';
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__';
 

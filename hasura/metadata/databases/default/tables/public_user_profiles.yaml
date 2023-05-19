@@ -1,0 +1,28 @@
+table:
+  name: user_profiles
+  schema: public
+select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+        - id
+        - created_at
+        - updated_at
+        - deleted_at
+        - username
+        - full_name
+        - about_me
+        - profile_image_url
+      filter: {}
+  - role: users
+    permission:
+      columns:
+        - about_me
+        - full_name
+        - profile_image_url
+        - username
+        - created_at
+        - deleted_at
+        - updated_at
+        - id
+      filter: {}

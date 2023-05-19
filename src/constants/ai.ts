@@ -14,7 +14,7 @@ export const LangchainMessageRoles = {
   System: 'system' as MessageType,
 };
 
-export interface BaseRequesttPayload {
+export interface BaseRequestPayload {
   input: string;
   messages: Message[];
   isStreaming?: boolean;

@@ -3,7 +3,7 @@ import { ApolloProvider } from '@apollo/client';
 import { ThemeProvider, VirtualConsoleProvider } from 'context';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
-import { useApollo } from 'utils/client/apolloClient';
+import { useApollo } from 'services/client';
 import { getIsNativePlatform } from 'utils/mobile/getIsNativePlatform';
 import 'styles/globals.css';
 

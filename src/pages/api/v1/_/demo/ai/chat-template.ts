@@ -4,7 +4,11 @@ import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 import { NextRequest, NextResponse } from 'next/server';
 import { LangchainMessageRoles } from 'constants/ai';
 import { RequestPayload, ResponsePayload } from 'constants/payloads/demo/chatTemplate';
-import { deserializeLangchainToChat, serializeChatToLangchain } from 'utils/ai/langchain';
+import {
+  deserializeLangchainToChat,
+  mapChatToLangchain,
+  mapLangchainToChat,
+} from 'utils/ai/langchain';
 
 export const config = {
   runtime: 'edge',
@@ -49,7 +53,7 @@ export default async function handler(req: NextRequest, res: NextResponse) {
       new SystemChatMessage(
         `You are a helpful assistant that only finds captials of the input. You speak in short answers that exactly answer the question.`,
       ),
-      ...serializeChatToLangchain(messages || []),
+      ...mapChatToLangchain(messages || []),
       new HumanChatMessage(formattedInput),
     ];
 
@@ -60,8 +64,8 @@ export default async function handler(req: NextRequest, res: NextResponse) {
     console.log(response.text);
 
     const responsePayload: ResponsePayload = {
-      answer: { ...response, role: LangchainMessageRoles.Ai },
-      messages: deserializeLangchainToChat([...chatLog, response]),
+      answer: deserializeLangchainToChat(response),
+      messages: mapLangchainToChat([...chatLog, response]),
       input: input,
       systemMessage,
     };

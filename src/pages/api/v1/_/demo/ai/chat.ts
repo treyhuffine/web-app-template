@@ -5,7 +5,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { LangchainMessageRoles } from 'constants/ai';
 import { HttpMethods } from 'constants/http';
 import { RequestPayload, ResponsePayload } from 'constants/payloads/demo/chat';
-import { deserializeLangchainToChat, serializeChatToLangchain } from 'utils/ai/langchain';
+import {
+  deserializeLangchainToChat,
+  mapChatToLangchain,
+  mapLangchainToChat,
+} from 'utils/ai/langchain';
 import {
   response400BadRequestError,
   response500ServerError,
@@ -39,11 +43,7 @@ const handler = async (req: NextRequest) => {
       chatLog = [...chatLog, new SystemChatMessage(systemMessage || DEFAULT_SYSTEM_MESSAGE)];
     }
 
-    chatLog = [
-      ...chatLog,
-      ...serializeChatToLangchain(messages || []),
-      new HumanChatMessage(input),
-    ];
+    chatLog = [...chatLog, ...mapChatToLangchain(messages || []), new HumanChatMessage(input)];
 
     console.log(chatLog);
 
@@ -95,8 +95,8 @@ const handler = async (req: NextRequest) => {
       console.log(response);
 
       const responsePayload: ResponsePayload = {
-        answer: { ...response, role: LangchainMessageRoles.Ai },
-        messages: deserializeLangchainToChat([...chatLog, response]),
+        answer: deserializeLangchainToChat(response),
+        messages: mapLangchainToChat([...chatLog, response]),
         input: input,
         systemMessage,
       };

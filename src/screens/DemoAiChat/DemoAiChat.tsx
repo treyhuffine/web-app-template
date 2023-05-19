@@ -8,7 +8,7 @@ import { KeyCodes } from 'utils/client/dom';
 import { useApiGateway } from 'hooks/useApi';
 import { useAutosizeTextArea } from 'hooks/useAutosizeTextArea';
 import SendIcon from 'svg/SendIcon';
-import Button from 'atoms/Button';
+import Button from 'components/Button';
 import AiMessage from './AiMessage';
 import UserMessage from './UserMessage';
 
@@ -171,9 +171,6 @@ const DemoAiChat = () => {
             }}
             className="mr-2 max-h-40 min-h-[2.5rem] w-full resize-none rounded-xl border border-gray-800 px-4 py-2 text-sm outline-none transition-shadow duration-200 ease-in-out focus:shadow-chat-box focus:outline-none disabled:opacity-60"
           />
-          <Button type="submit">
-            <SendIcon />
-          </Button>
           <Button
             type="submit"
             disabled={isLoading}
