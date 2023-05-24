@@ -12,7 +12,7 @@ const TOP_NAV_HEIGHT = '48px';
 const SIDE_NAV_WIDTH = '360px';
 const CHAT_MAX_WIDTH = '840px';
 
-const converPaletteToTailwind = (palette) => {
+const convertPaletteToTailwind = (palette) => {
   const name = palette.name;
   const colors = palette.colors;
 
@@ -42,8 +42,8 @@ export default {
         'chat-box': '0 2px 4px rgb(0 0 0 / 50%)',
       },
       colors: {
-        ...converPaletteToTailwind(paletteBrandGray),
-        ...converPaletteToTailwind(paletteBrandBlue),
+        ...convertPaletteToTailwind(paletteBrandGray),
+        ...convertPaletteToTailwind(paletteBrandBlue),
         'brand-primary': app.colors['brand-primary'],
         'brand-secondary': app.colors['brand-secondary'],
         'brand-accent': app.colors['brand-accent'],

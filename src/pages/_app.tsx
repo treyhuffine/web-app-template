@@ -23,15 +23,6 @@ export default function App({ Component, pageProps, err }: AppProps & { err: any
         <meta name="theme-color" content="#FFFFFF" />
         <link rel="manifest" href={`${process.env.APP_URL}/manifest.json`} />
         <link rel="shortcut icon" href={`${process.env.APP_URL}/icons/favicon.png`} />
-        {/* <link
-          rel="preload"
-          href="public/fonts/mulish-v12-latin-regular.ttf"
-          as="font"
-          crossOrigin=""
-        />
-        <link rel="preload" href="public/fonts/mulish-v12-latin-700.ttf" as="font" crossOrigin="" />
-        <link rel="preload" href="public/fonts/mulish-v12-latin-500.ttf" as="font" crossOrigin="" />
-        <link rel="preload" href="public/fonts/mulish-v12-latin-300.ttf" as="font" crossOrigin="" /> */}
         <meta name="application-name" content="" />
         <meta name="apple-mobile-web-app-title" content="" />
         <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
