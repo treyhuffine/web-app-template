@@ -27,13 +27,13 @@ interface Props {
 
 const DISABLE_LINKS_UNTIL_LAUNCHED = true;
 
-const TopNav: React.FC<Props> = ({
+const TopNav = ({
   shouldShowAdditionalLinks,
   shouldShowMobile,
   shouldLinkToAuthPage,
   shouldShowStartAction,
   isBlur,
-}) => {
+}: Props) => {
   const viewer = useViewer();
   const [isLoginOpen, setIsLoginOpen] = React.useState(false);
   const [isSignupOpen, setIsSignupOpen] = React.useState(false);

@@ -9,9 +9,9 @@ interface Props {
   isIgnoreMobileTabs?: boolean;
 }
 
-const SafeAreaPage: React.FC<Props> = ({ children, isHideSidebar, isIgnoreMobileTabs }) => {
+const SafeAreaPage = ({ children, isHideSidebar, isIgnoreMobileTabs }: Props) => {
   return (
-    <div className="safearea-pad-y flex h-full grow flex-col bg-color-bg-lightmode-primary">
+    <div className="safearea-pad-y bg-color-bg-lightmode-primary flex h-full grow flex-col">
       <TopNav />
       {!isHideSidebar && <SidebarNav />}
       <div

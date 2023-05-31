@@ -9,9 +9,9 @@ interface Props {
   isIgnoreMobileTabs?: boolean;
 }
 
-const TabPageScrollChildViewHeight: React.FC<Props> = ({ isHideSidebar, children }) => {
+const TabPageScrollChildViewHeight = ({ isHideSidebar, children }: Props) => {
   return (
-    <div className="safearea-pad-y flex h-screen grow flex-col overflow-hidden bg-color-bg-lightmode-primary pb-tabs">
+    <div className="safearea-pad-y bg-color-bg-lightmode-primary pb-tabs flex h-screen grow flex-col overflow-hidden">
       <TopNav />
       {!isHideSidebar && <SidebarNav />}
       <div

@@ -4,7 +4,7 @@ interface Props {
   text: string;
 }
 
-const UserMessage: FC<Props> = ({ text }) => {
+const UserMessage = ({ text }: Props) => {
   return (
     <div>
       <div className="text-sm font-bold">You</div>

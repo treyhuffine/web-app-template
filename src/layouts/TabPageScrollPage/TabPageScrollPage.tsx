@@ -9,17 +9,17 @@ interface Props {
   ignoreSafeTop?: boolean;
 }
 
-const TabPageScrollPage: React.FC<Props> = ({ children, ignoreSafeTop = false }) => {
+const TabPageScrollPage = ({ children, ignoreSafeTop = false }: Props) => {
   return (
     <div
       className={classNames(
-        'safearea-pad-bot flex h-full grow flex-col bg-color-bg-lightmode-primary',
+        'safearea-pad-bot bg-color-bg-lightmode-primary flex h-full grow flex-col',
         !ignoreSafeTop && 'safearea-pad-top',
       )}
     >
       <TopNav />
       <SidebarNav />
-      <div className="flex h-full grow flex-col pb-tabs lg:pb-0 lg:pl-sidebar">{children}</div>
+      <div className="pb-tabs lg:pl-sidebar flex h-full grow flex-col lg:pb-0">{children}</div>
       <TabBar />
     </div>
   );

@@ -7,7 +7,7 @@ export const ThemeToggleContext = React.createContext({
   setTheme: (_theme: ThemeNames) => {},
 });
 
-const ThemeToggleContextProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+const ThemeToggleContextProvider = ({ children }: React.PropsWithChildren) => {
   const [theme, setTheme] = React.useState(ThemeNames.Light);
 
   return (
@@ -17,12 +17,12 @@ const ThemeToggleContextProvider: React.FC<React.PropsWithChildren> = ({ childre
   );
 };
 
-const Wrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
+const Wrapper = ({ children }: React.PropsWithChildren) => {
   return <ThemeToggleContextProvider>{children}</ThemeToggleContextProvider>;
 };
 
 /**@todo use custom provider */
-const ThemeProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+const ThemeProvider = ({ children }: React.PropsWithChildren) => {
   const { theme } = React.useContext(ThemeToggleContext);
   const themeObject = themeMap[theme];
 

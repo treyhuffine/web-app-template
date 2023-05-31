@@ -17,7 +17,7 @@ const getSidebarItems = () => {
   return [];
 };
 
-const SidebarNav: React.FC<Props> = ({ isTopNavHidden }) => {
+const SidebarNav = ({ isTopNavHidden }: Props) => {
   const viewer = useViewer();
   const router = useRouter();
   const [isLoginOpen, setIsLoginOpen] = React.useState(false);

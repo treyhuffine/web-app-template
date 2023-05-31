@@ -5,7 +5,7 @@ interface Props {
   text: string;
 }
 
-const AiMessage: FC<Props> = ({ text }) => {
+const AiMessage = ({ text }: Props) => {
   return (
     <div>
       <div className="text-sm font-bold">AI</div>

@@ -17,7 +17,7 @@ export const EXIT_DURATION_MS = 200;
 export const EXIT_DURATION_SAFE_MS = EXIT_DURATION_MS + 300;
 
 // NOTE: How to handle widths and max widths??
-const Modal: React.FC<ModalProps> = ({
+const Modal = ({
   isOpen,
   handleClose,
   maxWidth,
@@ -25,7 +25,7 @@ const Modal: React.FC<ModalProps> = ({
   swipeProps,
   positionBottomDesktop,
   children,
-}) => {
+}: ModalProps) => {
   const swipeHandlers = swipeProps ? useSwipeable(swipeProps) : {};
 
   return (

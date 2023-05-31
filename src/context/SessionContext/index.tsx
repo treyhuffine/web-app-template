@@ -26,7 +26,7 @@ export const SessionContext = React.createContext<Viewer & SessionUtils>({
   isAnonymousSession: false,
 });
 
-export const SessionProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+export const SessionProvider = ({ children }: React.PropsWithChildren) => {
   const [session, setSession] = React.useState(DEFAULT_VIEWER);
 
   React.useEffect(() => {

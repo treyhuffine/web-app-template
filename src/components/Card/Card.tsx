@@ -6,14 +6,9 @@ interface Props {
   children: React.ReactNode;
 }
 
-const Card: React.FC<Props> = ({ backgroundColor = 'bg-color-bg-lightmode-primary', children }) => {
+const Card = ({ backgroundColor = 'bg-bg-primary-lightmode', children }: Props) => {
   return (
-    <div
-      className={classNames(
-        'rounded-md bg-color-bg-lightmode-primary shadow-lightmode-primary',
-        backgroundColor,
-      )}
-    >
+    <div className={classNames('shadow-lightmode-primary rounded-md', backgroundColor)}>
       {children}
     </div>
   );

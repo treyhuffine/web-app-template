@@ -10,7 +10,7 @@ const DEFAULT_STATE = {
 
 export const VirtualConsoleContext = React.createContext(DEFAULT_STATE);
 
-export const VirtualConsoleProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+export const VirtualConsoleProvider = ({ children }: React.PropsWithChildren) => {
   const [isVirtualConsoleEnabled, setIsVirtualConsoleEnabled] = React.useState(
     DEFAULT_STATE.isVirtualConsoleEnabled,
   );

@@ -7,7 +7,7 @@ interface Props {
   className?: string;
 }
 
-const TransitionFadeIn: React.FC<Props> = ({ isShowing, children, className = '' }) => {
+const TransitionFadeIn = ({ isShowing, children, className = '' }: Props) => {
   return (
     <Transition
       className={className}

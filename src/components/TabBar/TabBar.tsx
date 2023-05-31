@@ -19,7 +19,7 @@ interface Props {
   }[];
 }
 
-const TabBar: React.FC<Props> = ({ aboveTabContent, tabs = [] }) => {
+const TabBar = ({ aboveTabContent, tabs = [] }: Props) => {
   const router = useRouter();
   const viewer = useViewer();
   const [isLoginOpen, setIsLoginOpen] = React.useState(false);

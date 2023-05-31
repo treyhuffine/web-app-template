@@ -30,7 +30,7 @@ const DEFAULT_USER: CurrentUser = {
 
 export const CurrentUserContext = React.createContext(DEFAULT_USER);
 
-export const CurrentUserProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+export const CurrentUserProvider = ({ children }: React.PropsWithChildren) => {
   const session = useSession();
   const [ipResponse, setIpResponse] = React.useState<IpResponse | null>(null);
   const [ipRequestStatus, setIpRequestStatus] = React.useState(RequestStatus.Idle);

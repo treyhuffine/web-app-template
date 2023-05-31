@@ -9,12 +9,12 @@ interface Props {
   isActive: boolean;
 }
 
-const SidebarItem: React.FC<Props> = ({ href, icon, text, isActive }) => {
+const SidebarItem = ({ href, icon, text, isActive }: Props) => {
   return (
     <Link href={href}>
       <a
         className={classNames(
-          'flex items-center rounded-md py-2 px-4 transition-colors hover:bg-brand-blue-100',
+          'flex items-center rounded-md px-4 py-2 transition-colors hover:bg-brand-blue-100',
           isActive && 'bg-brand-blue-200 hover:bg-brand-blue-200',
         )}
       >

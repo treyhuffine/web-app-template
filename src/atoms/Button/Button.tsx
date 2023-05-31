@@ -1,8 +1,8 @@
-import React, { FC } from 'react';
+import React from 'react';
 
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
 
-const Button: FC<Props> = ({ type = 'button', children, ...rest }) => {
+const Button = ({ type = 'button', children, ...rest }: Props) => {
   return (
     <button type={type} {...rest}>
       {children}
