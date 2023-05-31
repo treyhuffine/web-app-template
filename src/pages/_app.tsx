@@ -20,13 +20,13 @@ export default function App({ Component, pageProps, err }: AppProps & { err: any
         <meta name="viewport" content={viewport} />
 
         {/* meta */}
-        <meta name="theme-color" content="#FFFFFF" />
+        <meta name="theme-color" content="#000000" />
         <link rel="manifest" href={`${process.env.APP_URL}/manifest.json`} />
         <link rel="shortcut icon" href={`${process.env.APP_URL}/icons/favicon.png`} />
         <meta name="application-name" content="" />
         <meta name="apple-mobile-web-app-title" content="" />
         <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
         {/* <link rel="mask-icon" href="/favicon-mask.svg" color="#FFF" /> */}
 
         {/* apple */}
