@@ -1,5 +1,5 @@
-import { HttpMethods } from 'constants/http';
 import { NextRequest, NextResponse } from 'next/server';
+import { HttpMethods } from 'constants/http';
 import { response405InvalidMethodError } from 'utils/server/edge/http';
 
 export const withHttpMethods = (handlers) => async (req: NextRequest, res: NextResponse) => {
@@ -15,3 +15,5 @@ export const withHttpMethods = (handlers) => async (req: NextRequest, res: NextR
 
   return handler(req, res);
 };
+
+export { HttpMethods };

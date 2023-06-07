@@ -3,7 +3,6 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { BaseChatMessage, HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 import { NextRequest, NextResponse } from 'next/server';
 import { LangchainMessageRoles } from 'constants/ai';
-import { HttpMethods } from 'constants/http';
 import { RequestPayload, ResponsePayload } from 'constants/payloads/demo/chat';
 import {
   deserializeLangchainToChat,
@@ -15,7 +14,7 @@ import {
   response500ServerError,
   responseJson200Success,
 } from 'utils/server/edge/http';
-import { withHttpMethods } from 'utils/server/edge/middleware/withHttpMethods';
+import { withHttpMethods, HttpMethods } from 'utils/server/edge/middleware/withHttpMethods';
 
 export const config = {
   runtime: 'edge',

@@ -4,8 +4,7 @@ import { PromptTemplate } from 'langchain/prompts';
 import { AIChatMessage, HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { HttpMethods } from 'constants/http';
-import { withHttpMethods } from 'utils/server/edge/middleware/withHttpMethods';
+import { withHttpMethods, HttpMethods } from 'utils/server/edge/middleware/withHttpMethods';
 
 export const config = {
   runtime: 'edge',

@@ -1,5 +1,5 @@
-import { HttpMethods } from 'constants/http';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { HttpMethods } from 'constants/http';
 import { response405InvalidMethodError } from 'utils/server/serverless/http';
 
 export const withHttpMethods = (handlers) => async (req: NextApiRequest, res: NextApiResponse) => {
@@ -15,3 +15,5 @@ export const withHttpMethods = (handlers) => async (req: NextApiRequest, res: Ne
 
   return handler(req, res);
 };
+
+export { HttpMethods };
