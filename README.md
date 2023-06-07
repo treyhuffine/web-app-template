@@ -16,3 +16,4 @@ A basic template for projects that I build.
 - React query?
 - Pull description
 - Do I want to use an "atoms" folder?
+- Is formik the best option for forms or should we consider something like react-hook-form?
