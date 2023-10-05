@@ -14,7 +14,7 @@ export const config = {
  * @todo IMPLEMENT THIS
  */
 
-const handler = async (req: NextRequest, res: NextResponse) => {
+export const POST = async (req: NextRequest, res: NextResponse) => {
   const { input, messages } = await req.json();
 
   if (!input) {
@@ -96,5 +96,5 @@ const handler = async (req: NextRequest, res: NextResponse) => {
 };
 
 export default withHttpMethods({
-  [HttpMethods.Post]: handler,
+  [HttpMethods.Post]: POST,
 });

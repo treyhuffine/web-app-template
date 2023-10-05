@@ -14,7 +14,7 @@ import {
   response500ServerError,
   responseJson200Success,
 } from 'utils/server/edge/http';
-import { withHttpMethods, HttpMethods } from 'utils/server/edge/middleware/withHttpMethods';
+import { HttpMethods, withHttpMethods } from 'utils/server/edge/middleware/withHttpMethods';
 
 export const config = {
   runtime: 'edge',
@@ -25,7 +25,7 @@ const DEFAULT_SYSTEM_MESSAGE = 'You are a helpful assistant.';
 const CHATGPT_MODEL_TURBO = 'gpt-3.5-turbo';
 const CHATGPT_MODEL_4 = 'gpt-4';
 
-const handler = async (req: NextRequest) => {
+export const POST = async (req: NextRequest) => {
   const payload: RequestPayload = await req.json();
   const { input, messages, isStreaming, temperature, systemMessage } = payload;
 
@@ -109,5 +109,5 @@ const handler = async (req: NextRequest) => {
 };
 
 export default withHttpMethods({
-  [HttpMethods.Post]: handler,
+  [HttpMethods.Post]: POST,
 });

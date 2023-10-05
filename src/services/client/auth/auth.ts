@@ -21,6 +21,7 @@ export const handleSignup = async ({
     })
     .catch((error) => {
       captureException(error);
+      throw error;
     });
 
 export const handleLogin = async ({
@@ -33,4 +34,5 @@ export const handleLogin = async ({
     })
     .catch((error) => {
       captureException(error);
+      throw error;
     });

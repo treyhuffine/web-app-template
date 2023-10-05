@@ -6,7 +6,10 @@ import classNames from 'styles/utils/classNames';
 export interface ModalProps {
   isOpen: boolean;
   handleClose: (value?: boolean) => void;
-  maxWidth?: string;
+  classNameRounded?: string;
+  classNameMaxWidth?: string;
+  classNamePosition?: string;
+  classNameHeight?: string;
   className?: string;
   positionBottomDesktop?: boolean;
   swipeProps?: SwipeableProps;
@@ -17,15 +20,18 @@ export const EXIT_DURATION_MS = 200;
 export const EXIT_DURATION_SAFE_MS = EXIT_DURATION_MS + 300;
 
 // NOTE: How to handle widths and max widths??
-const Modal = ({
+const Modal: React.FC<ModalProps> = ({
   isOpen,
   handleClose,
-  maxWidth,
+  classNameRounded,
+  classNameMaxWidth,
+  classNamePosition,
+  classNameHeight,
   className,
   swipeProps,
   positionBottomDesktop,
   children,
-}: ModalProps) => {
+}) => {
   const swipeHandlers = swipeProps ? useSwipeable(swipeProps) : {};
 
   return (
@@ -48,6 +54,7 @@ const Modal = ({
             className={classNames(
               'flex min-h-full items-end justify-center',
               positionBottomDesktop ? 'sm:items-end' : 'sm:items-center',
+              !!classNameHeight && classNameHeight,
             )}
           >
             <Transition.Child
@@ -59,11 +66,18 @@ const Modal = ({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <div className="flex w-full justify-center">
+              <div
+                className={classNames(
+                  'flex w-full items-center justify-center',
+                  !!classNameHeight && classNameHeight,
+                )}
+              >
                 <Dialog.Panel
                   className={classNames(
-                    'relative w-full transform overflow-hidden rounded-t-3xl bg-color-bg-lightmode-primary shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:rounded-2xl lg:max-w-md',
-                    maxWidth ? maxWidth : 'sm:max-w-lg',
+                    'bg-color-bg-lightmode-primary w-full transform overflow-hidden shadow-xl transition-all sm:my-8 sm:w-full',
+                    classNameRounded ? classNameRounded : 'rounded-t-3xl sm:rounded-2xl',
+                    classNamePosition ? classNamePosition : 'relative',
+                    classNameMaxWidth ? classNameMaxWidth : 'sm:max-w-md',
                     !!className && className,
                   )}
                 >

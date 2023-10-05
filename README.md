@@ -12,6 +12,10 @@ A basic template for projects that I build.
 ## Todo
 
 - Build common components (modals, buttons, etc)
+- Get latest cloudflare service for signing an image and add UI example
+- Better utility functions for mime types
+- Is the client/services built how I want it? Particularly src/services/client/auth - is that the right nesting?
+- Blog template (at least UI and think on fetching and a way to make it CMS-generic)
 - Include something for Hasura
 - React query?
 - Pull description

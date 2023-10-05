@@ -1,5 +1,7 @@
 import fetch from 'isomorphic-unfetch';
 import { HttpMethods } from 'constants/http';
+import { removeLeadingSlash } from 'utils/shared/string/removeLeadingSlash';
+import { removeTrailingSlash } from 'utils/shared/string/removeTrailingSlash';
 
 type HeadersInit =
   | Record<string, string>
@@ -9,6 +11,7 @@ type HeadersInit =
 interface ConstructorConfig {
   baseUrl?: string;
   headers?: HeadersInit;
+  injectHeaders?: () => Promise<object>;
 }
 
 export interface RequestConfig extends RequestInit {
@@ -18,16 +21,17 @@ export interface RequestConfig extends RequestInit {
 class APIService {
   baseUrl: string;
   headers: HeadersInit;
+  injectHeaders?: () => Promise<object>;
 
-  constructor({ baseUrl = '', headers = {} }: ConstructorConfig) {
-    this.baseUrl = baseUrl;
+  constructor({ baseUrl = '', headers = {}, injectHeaders }: ConstructorConfig) {
+    this.baseUrl = removeTrailingSlash(baseUrl);
     this.headers = headers;
+    this.injectHeaders = injectHeaders;
   }
 
-  request(endpoint: string, { payload, ...customConfig }: RequestConfig = {}) {
+  async request(endpoint: string, { payload, ...customConfig }: RequestConfig = {}) {
     const headers = { 'content-type': 'application/json', ...this.headers };
     const config: RequestInit = {
-      method: payload ? HttpMethods.Post : HttpMethods.Get,
       ...customConfig,
       headers: {
         ...headers,
@@ -35,25 +39,33 @@ class APIService {
       },
     };
 
+    if (this.injectHeaders) {
+      const injectedHeaders = await this.injectHeaders();
+      config.headers = {
+        ...config.headers,
+        ...injectedHeaders,
+      };
+    }
+
     if (payload) {
       config.body = JSON.stringify(payload);
     }
 
-    return fetch(`${this.baseUrl}/${endpoint}`, config).then(async (response) => {
-      let data;
+    const requestEndpoint = removeLeadingSlash(endpoint);
 
-      try {
-        data = await response.json();
-      } catch (error) {
-        // NOTE: This typically means it was an empty payload which is common when only a success response is sent
-        // Should I track this in any way?
-      }
+    return fetch(`${this.baseUrl}/${requestEndpoint}`, config).then(async (response) => {
+      const isJson = response.headers.get('content-type')?.includes('application/json');
 
       if (response.ok) {
-        return data;
+        if (isJson) {
+          const data = await response.json();
+          return data;
+        } else {
+          return response;
+        }
       } else {
         // TODO: Log in sentry
-        return Promise.reject(data);
+        return Promise.reject(isJson ? await response.json() : await response.text());
       }
     });
   }

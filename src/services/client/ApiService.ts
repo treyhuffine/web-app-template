@@ -1,4 +1,6 @@
 import { HttpMethods } from 'constants/http';
+import { removeLeadingSlash } from 'utils/shared/string/removeLeadingSlash';
+import { removeTrailingSlash } from 'utils/shared/string/removeTrailingSlash';
 
 interface ConstructorConfig {
   baseUrl?: string;
@@ -14,17 +16,15 @@ class APIService {
   injectHeaders?: () => Promise<object>;
 
   constructor({ baseUrl = '', injectHeaders }: ConstructorConfig) {
-    this.baseUrl = baseUrl;
+    this.baseUrl = removeTrailingSlash(baseUrl);
     this.injectHeaders = injectHeaders;
   }
 
   async request(endpoint: string, { payload, ...customConfig }: RequestConfig = {}) {
-    const headers = { 'content-type': 'application/json' };
     const config: RequestInit = {
       method: payload ? HttpMethods.Post : HttpMethods.Get,
       ...customConfig,
       headers: {
-        ...headers,
         ...customConfig.headers,
       },
     };
@@ -38,16 +38,29 @@ class APIService {
     }
 
     if (payload) {
-      config.body = JSON.stringify(payload);
+      if (payload instanceof FormData) {
+        config.body = payload;
+      } else {
+        config.body = JSON.stringify(payload);
+        config.headers = { ...config.headers, 'content-type': 'application/json' };
+      }
     }
 
-    return fetch(`${this.baseUrl}/${endpoint}`, config).then(async (response) => {
-      const data = await response.json();
+    const requestEndpoint = removeLeadingSlash(endpoint);
+
+    return fetch(`${this.baseUrl}/${requestEndpoint}`, config).then(async (response) => {
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+
       if (response.ok) {
-        return data;
+        if (isJson) {
+          const data = await response.json();
+          return data;
+        } else {
+          return response;
+        }
       } else {
         // TODO: Log in sentry
-        return Promise.reject(data);
+        return Promise.reject(isJson ? await response.json() : await response.text());
       }
     });
   }

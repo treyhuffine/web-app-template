@@ -35,6 +35,7 @@ export default {
     './src/screens/**/*.{js,ts,jsx,tsx}',
     './src/app/**/*.{js,ts,jsx,tsx}',
     './src/atoms/**/*.{js,ts,jsx,tsx}',
+    './src/svg/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -48,9 +49,9 @@ export default {
         'brand-secondary': app.colors['brand-secondary'],
         'brand-accent': app.colors['brand-accent'],
         'text-primary-lightmode': paletteBrandGray.colors['900'],
-        'text-secondary-lightmode': paletteBrandGray.colors['700'],
+        'text-secondary-lightmode': paletteBrandGray.colors['800'],
         'text-primary-darkmode': paletteBrandGray.colors['100'],
-        'text-secondary-darkmode': paletteBrandGray.colors['300'],
+        'text-secondary-darkmode': paletteBrandGray.colors['200'],
         'bg-primary-lightmode': paletteBrandGray.colors['0'],
         'bg-primary-darkmode': paletteBrandGray.colors['900'],
         'user-chat-message': paletteBrandBlue.colors['100'],
@@ -63,7 +64,8 @@ export default {
         'border-primary-lightmode': '#E5E7EB',
       },
       fontFamily: {
-        sans: ['Inter', ...fontFamily.sans],
+        body: ['Inter', ...fontFamily.sans],
+        title: ['Poppins', 'Inter', ...fontFamily.sans],
       },
       screens: {
         'lp-hero': '1600px',

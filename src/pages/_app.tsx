@@ -32,7 +32,10 @@ export default function App({ Component, pageProps, err }: AppProps & { err: any
         {/* apple */}
         <link rel="apple-touch-icon" href={`${process.env.APP_URL}/icons/apple-icon.png`} />
       </Head>
-
+      {/*
+        Use next/script here
+        <Script></Script>
+      */}
       {/* <SessionProvider> */}
       <VirtualConsoleProvider>
         <ApolloProvider client={apolloClient}>

@@ -9,16 +9,12 @@ import {
    */
   // FetchStatus
 } from 'constants/requests';
+import { getViewerToken } from 'services/client/auth/token';
+import { removeBoundSlash } from 'utils/shared/string/removeBoundSlash';
 
 /**
  * @todo SHOULD I JUST USE REACT QUERY?
  */
-
-/**
- * @todo Implement this once we have a GraphQL URL to pull necessary data for the getViewerToken
- */
-// import { getViewerToken } from 'services/client';
-
 /**
  * @todo Should I make a simple version that just returns the response and manages the loading state?
  */
@@ -66,22 +62,14 @@ type UseApiReturnType<TRequestPayload, TResponsePayload> = {
   resetInitialState: () => void;
 };
 
-/**
- * @todo Implement this once we have a GraphQL URL to pull necessary data for the getViewerToken
- */
-// const injectViewerToken = async () => {
-//   const token = await getViewerToken();
-//
-//   if (token) {
-//     return { Authorization: `Bearer ${token}` };
-//   } else {
-//     return {};
-//   }
-// };
-const injectViewerToken = async () => ({});
+const injectViewerToken = async () => {
+  const token = await getViewerToken();
 
-const removeLeadingSlash = (endpoint: string = '') => {
-  return endpoint[0] === '/' ? endpoint.slice(1) : endpoint;
+  if (token) {
+    return { Authorization: `Bearer ${token}` };
+  } else {
+    return {};
+  }
 };
 
 export const useApi = <TRequestPayload = any, TResponsePayload = any>({
@@ -136,11 +124,9 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
     setIsCalled(true);
 
     try {
-      const headers = { 'content-type': 'application/json' };
       const config: RequestInit = {
         ...customConfig,
         headers: {
-          ...headers,
           ...customConfig.headers,
         },
       };
@@ -154,14 +140,19 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
       }
 
       if (payload) {
-        config.body = JSON.stringify(payload);
+        if (payload instanceof FormData) {
+          config.body = payload;
+        } else {
+          config.body = JSON.stringify(payload);
+          config.headers = { ...config.headers, 'content-type': 'application/json' };
+        }
       }
 
       /**
        * @todo Should I pick between the endpoints or combine them?
        */
-      const endpoint = `${endpointPrefix || ''}/${removeLeadingSlash(fetchEndpoint || '')}`;
-      const requestEndpoint = removeLeadingSlash(endpoint);
+      const endpoint = `${endpointPrefix || ''}/${removeBoundSlash(fetchEndpoint || '')}`;
+      const requestEndpoint = removeBoundSlash(endpoint);
 
       const response = await fetch(`${baseUrl}/${requestEndpoint}`, {
         ...config,
@@ -184,22 +175,24 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
 
       if (isStream) {
         const data = response.body;
-        const reader = data.getReader();
+        const reader = data?.getReader();
         const decoder = new TextDecoder();
         let result = '';
         let done = false;
 
-        while (!done) {
-          const { value, done: doneReading } = await reader.read();
-          done = doneReading;
-          const chunkValue = decoder.decode(value);
-          result += chunkValue;
-          // @ts-ignore It will be a string if it's streaming, how do I tell TS that?
-          // setData((prev) => prev + chunkValue);
-          /**
-           * @todo Pass in a handleStream function that handles the stream response? Maybe you need to JSON.parse or something.
-           */
-          setStream((prev) => (prev || '') + chunkValue);
+        if (reader) {
+          while (!done) {
+            const { value, done: doneReading } = await reader.read();
+            done = doneReading;
+            const chunkValue = decoder.decode(value);
+            result += chunkValue;
+            // @ts-ignore It will be a string if it's streaming, how do I tell TS that?
+            // setData((prev) => prev + chunkValue);
+            /**
+             * @todo Pass in a handleStream function that handles the stream response? Maybe you need to JSON.parse or something.
+             */
+            setStream((prev) => (prev || '') + chunkValue);
+          }
         }
 
         setStatus(RequestStatus.Success);
@@ -217,7 +210,8 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
 
         return { data: result, isStream, isError: false };
       }
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       setError(error.message);
       setStatus(RequestStatus.Error);
 
@@ -238,15 +232,15 @@ export const useApi = <TRequestPayload = any, TResponsePayload = any>({
     status,
     error,
     fetchData,
-    post: ({ payload, ...rest }: RequestConfig<TRequestPayload>) =>
+    post: ({ payload, ...rest }: RequestConfig<TRequestPayload> = {}) =>
       fetchData({ ...rest, method: HttpMethods.Post, payload }),
-    get: ({ payload, ...rest }: RequestConfig<TRequestPayload>) =>
+    get: ({ payload, ...rest }: RequestConfig<TRequestPayload> = {}) =>
       fetchData({ ...rest, method: HttpMethods.Get, payload }),
-    put: ({ payload, ...rest }: RequestConfig<TRequestPayload>) =>
+    put: ({ payload, ...rest }: RequestConfig<TRequestPayload> = {}) =>
       fetchData({ ...rest, method: HttpMethods.Put, payload }),
-    patch: ({ payload, ...rest }: RequestConfig<TRequestPayload>) =>
+    patch: ({ payload, ...rest }: RequestConfig<TRequestPayload> = {}) =>
       fetchData({ ...rest, method: HttpMethods.Patch, payload }),
-    delete: ({ payload, ...rest }: RequestConfig<TRequestPayload>) =>
+    delete: ({ payload, ...rest }: RequestConfig<TRequestPayload> = {}) =>
       fetchData({ ...rest, method: HttpMethods.Delete, payload }),
     isCalled,
     RequestStatus,
